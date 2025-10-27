@@ -7,6 +7,7 @@
     "module": "ESNext",
     "types": ["vite/client", "chrome"],
     "skipLibCheck": true,
+    "esModuleInterop": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
