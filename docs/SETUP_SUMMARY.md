@@ -97,12 +97,33 @@ npm run lint        # Run ESLint
 ## Extension Configuration
 
 ### Manifest V3 Features
-- **Service Worker**: Background script for extension logic
-- **Permissions**: 
-  - `storage` - For Chrome storage API
-  - `unlimitedStorage` - For large data storage
-- **Content Security Policy**: Configured for WASM support (required by libsodium)
-- **Action**: Popup UI with icon
+
+#### Service Worker (Background Script)
+The extension uses a service worker instead of background pages (required in Manifest V3):
+- **File**: `src/background.ts`
+- **Type**: ES Module
+- **Compiled to**: `dist/service-worker-loader.js`
+- **Features**:
+  - Initialization logging
+  - Installation event listener
+  - Runtime message handler for communication with popup/content scripts
+
+#### Permissions
+- **`storage`**: Enables Chrome storage API for persistent data
+- **`unlimitedStorage`**: Allows storing large amounts of encrypted credential data
+- **`host_permissions`**: Currently empty (no external site access required)
+
+#### Content Security Policy
+- **`extension_pages`**: `script-src 'self' 'wasm-unsafe-eval'; object-src 'self'`
+- Configured to allow WASM execution (required by libsodium.js for cryptographic operations)
+- Restricts script sources to the extension itself for security
+
+#### Action (Popup UI)
+- **Default Popup**: `index.html` - Main UI entry point
+- **Icons**: Three sizes provided for different display contexts
+  - 16x16: Toolbar icon
+  - 48x48: Extensions management page
+  - 128x128: Chrome Web Store and installation dialogs
 
 ### Security Features
 - End-to-end encryption with libsodium
@@ -130,13 +151,25 @@ npm run lint        # Run ESLint
 
 ## Verification Status
 
-✅ **Build**: Successfully compiles TypeScript and bundles all assets
-✅ **Linting**: Passes all ESLint rules
-✅ **Testing**: Jest configured and sample test passing
-✅ **Security**: 
-  - No vulnerabilities in dependencies (verified with GitHub Advisory Database)
-  - No security issues found by CodeQL
-✅ **Type Safety**: Full TypeScript support with strict mode enabled
+### Manifest V3 Compliance ✅
+- **Manifest Version**: 3 (required for new Chrome extensions)
+- **Service Worker**: Properly configured with ES Module type
+- **Background Pages**: Not used (deprecated in V3)
+- **Host Permissions**: Separated from permissions array
+- **Action API**: Used instead of deprecated browser_action/page_action
+- **Content Security Policy**: V3-compliant format
+
+### Build & Quality ✅
+- **Build**: Successfully compiles TypeScript and bundles all assets
+- **Linting**: Passes all ESLint rules
+- **Testing**: Jest configured and sample test passing
+- **Type Safety**: Full TypeScript support with strict mode enabled
+
+### Security ✅
+- **Dependencies**: No vulnerabilities in dependencies (verified with GitHub Advisory Database)
+- **Code Scanning**: No security issues found by CodeQL
+- **Cryptography**: Industry-standard algorithms via libsodium
+- **Data Storage**: Local-only with IndexedDB, no external communication
 
 ## Next Steps
 
