@@ -57,14 +57,15 @@ describe('Background Service Worker', () => {
     
     // Mock sendResponse function
     const sendResponse = jest.fn();
+    // Send an invalid message (will get error response)
     const mockMessage = { type: 'test' };
     const mockSender = {} as chrome.runtime.MessageSender;
     
     // Call the callback
     const result = onMessageCallback(mockMessage, mockSender, sendResponse);
     
-    expect(sendResponse).toHaveBeenCalledWith({ status: 'ok' });
-    expect(result).toBe(true);
+    expect(sendResponse).toHaveBeenCalledWith({ error: 'Invalid message format' });
+    expect(result).toBe(false);
     
     consoleSpy.mockRestore();
   });
