@@ -4,7 +4,7 @@
  * Main popup interface container
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useVaultStore } from '../store/vaultStore';
 import { SearchBar } from './SearchBar';
 import { PasswordList } from './PasswordList';
@@ -26,7 +26,32 @@ export function PopupContainer() {
     selectCredential,
     copyToClipboard,
     getFilteredCredentials,
+    updateActivity,
   } = useVaultStore();
+
+  // Track user activity on mouse and keyboard events
+  useEffect(() => {
+    if (!isUnlocked) {
+      return;
+    }
+
+    const handleActivity = () => {
+      updateActivity();
+    };
+
+    // Add listeners for user activity
+    window.addEventListener('mousedown', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('scroll', handleActivity);
+    window.addEventListener('touchstart', handleActivity);
+
+    return () => {
+      window.removeEventListener('mousedown', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('scroll', handleActivity);
+      window.removeEventListener('touchstart', handleActivity);
+    };
+  }, [isUnlocked, updateActivity]);
 
   const filteredCredentials = getFilteredCredentials();
 

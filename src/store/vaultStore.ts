@@ -97,6 +97,13 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     const sessionStore = useSessionStore.getState();
     void sessionStore.initializeSession();
     sessionStore.startAutoLockTimer();
+    
+    // Notify background script
+    if (typeof chrome !== 'undefined' && 'runtime' in chrome) {
+      void chrome.runtime.sendMessage({ type: 'vault-unlock' }).catch(() => {
+        // Ignore if background script is not available
+      });
+    }
   },
 
   /**
@@ -114,6 +121,13 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       const sessionStore = useSessionStore.getState();
       await sessionStore.initializeSession();
       sessionStore.startAutoLockTimer();
+      
+      // Notify background script
+      if (typeof chrome !== 'undefined' && 'runtime' in chrome) {
+        void chrome.runtime.sendMessage({ type: 'vault-unlock' }).catch(() => {
+          // Ignore if background script is not available
+        });
+      }
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to load credentials',
@@ -139,6 +153,13 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       selectedCredentialId: null,
       error: null,
     });
+    
+    // Notify background script
+    if (typeof chrome !== 'undefined' && 'runtime' in chrome) {
+      void chrome.runtime.sendMessage({ type: 'vault-lock' }).catch(() => {
+        // Ignore if background script is not available
+      });
+    }
   },
 
   /**
@@ -242,6 +263,25 @@ if (typeof window !== 'undefined') {
     const vaultStore = useVaultStore.getState();
     if (vaultStore.isUnlocked) {
       vaultStore.lock();
+    }
+  });
+}
+
+/**
+ * Listen for lock messages from background script
+ */
+if (typeof chrome !== 'undefined' && 'runtime' in chrome) {
+  chrome.runtime.onMessage.addListener((message: unknown) => {
+    if (typeof message === 'object' && message !== null && 'type' in message) {
+      const msg = message as { type: string; reason?: string };
+      
+      if (msg.type === 'vault-locked') {
+        console.log('[VaultStore] Received lock message from background:', msg.reason);
+        const vaultStore = useVaultStore.getState();
+        if (vaultStore.isUnlocked) {
+          vaultStore.lock();
+        }
+      }
     }
   });
 }
