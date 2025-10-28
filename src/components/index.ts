@@ -8,3 +8,4 @@ export { PopupContainer } from './PopupContainer';
 export { SearchBar } from './SearchBar';
 export { PasswordList } from './PasswordList';
 export { CredentialItem } from './CredentialItem';
+export { PasswordGenerator } from './PasswordGenerator';

@@ -28,3 +28,15 @@ export {
   XCHACHA20_PARAMS,
   type EncryptedData,
 } from './encryption';
+
+export {
+  generatePassword,
+  calculatePasswordStrength,
+  validateOptions,
+  CHARACTER_SETS,
+  PASSWORD_CONSTRAINTS,
+  DEFAULT_OPTIONS,
+  PasswordStrength,
+  type PasswordGeneratorOptions,
+  type PasswordStrengthResult,
+} from './passwordGenerator';

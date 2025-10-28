@@ -4,11 +4,15 @@
  * Main popup interface container
  */
 
+import { useState } from 'react';
 import { useVaultStore } from '../store/vaultStore';
 import { SearchBar } from './SearchBar';
 import { PasswordList } from './PasswordList';
+import { PasswordGenerator } from './PasswordGenerator';
 
 export function PopupContainer() {
+  const [showGenerator, setShowGenerator] = useState(false);
+  
   const {
     isUnlocked,
     credentials,
@@ -37,6 +41,14 @@ export function PopupContainer() {
       await copyToClipboard(credential.username);
     } catch (error) {
       console.error('Failed to copy username:', error);
+    }
+  };
+
+  const handlePasswordGenerated = async (password: string) => {
+    try {
+      await copyToClipboard(password);
+    } catch (error) {
+      console.error('Failed to copy generated password:', error);
     }
   };
 
@@ -102,15 +114,39 @@ export function PopupContainer() {
     );
   }
 
+  // Show password generator if opened
+  if (showGenerator) {
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-50 p-4">
+        <PasswordGenerator
+          onClose={() => { setShowGenerator(false); }}
+          onPasswordGenerated={(password) => { void handlePasswordGenerated(password); }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 bg-white">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-lg font-semibold text-gray-900">Key Vault</h1>
-          <span className="text-sm text-gray-500">
-            {credentials.length} {credentials.length === 1 ? 'credential' : 'credentials'}
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { setShowGenerator(true); }}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+              title="Generate password"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+              <span>Generate</span>
+            </button>
+            <span className="text-sm text-gray-500">
+              {credentials.length} {credentials.length === 1 ? 'credential' : 'credentials'}
+            </span>
+          </div>
         </div>
         <SearchBar value={searchQuery} onChange={searchCredentials} />
       </div>
