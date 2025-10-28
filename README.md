@@ -45,6 +45,7 @@ npm install
 
 ### Development Guides
 - **[Development Workflow Guide](./docs/DEVELOPMENT_WORKFLOW.md)** - Complete guide for development with hot reload
+- **[TypeScript Configuration Guide](./docs/TYPESCRIPT_CONFIGURATION.md)** - Comprehensive TypeScript setup and best practices
 - **[Chrome Extension Loading Guide](./docs/CHROME_EXTENSION_GUIDE.md)** - Comprehensive guide for loading the extension in Chrome
 - **[Setup Summary](./docs/SETUP_SUMMARY.md)** - Technical stack and configuration details
 

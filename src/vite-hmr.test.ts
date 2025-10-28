@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 describe('Vite Configuration', () => {
   it('should have vite.config.ts with proper HMR settings', () => {
@@ -22,14 +22,18 @@ describe('Vite Configuration', () => {
 
   it('should have @vitejs/plugin-react in package.json', () => {
     const packageJsonPath = join(__dirname, '..', 'package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as {
+      devDependencies: Record<string, string>;
+    };
 
     expect(packageJson.devDependencies).toHaveProperty('@vitejs/plugin-react');
   });
 
   it('should have dev script configured', () => {
     const packageJsonPath = join(__dirname, '..', 'package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as {
+      scripts: Record<string, string>;
+    };
 
     expect(packageJson.scripts).toHaveProperty('dev');
     expect(packageJson.scripts.dev).toBe('vite');
