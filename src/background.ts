@@ -13,6 +13,93 @@ import {
 
 console.log('Key Vault Extension - Background service worker initialized');
 
+// Session state in background
+interface SessionState {
+  isUnlocked: boolean;
+  lastActivity: number;
+  lockTimeoutMinutes: number;
+}
+
+interface SessionSettings {
+  lockTimeoutMinutes: number;
+}
+
+const sessionState: SessionState = {
+  isUnlocked: false,
+  lastActivity: Date.now(),
+  lockTimeoutMinutes: 15,
+};
+
+// Auto-lock timer
+let autoLockTimer: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Initialize session settings from storage
+ */
+async function initializeSessionSettings(): Promise<void> {
+  try {
+    const result = await chrome.storage.local.get('sessionSettings');
+    if (result.sessionSettings) {
+      const settings = result.sessionSettings as SessionSettings;
+      if (typeof settings.lockTimeoutMinutes === 'number') {
+        sessionState.lockTimeoutMinutes = settings.lockTimeoutMinutes;
+      }
+    }
+  } catch (error) {
+    console.error('[Background] Failed to load session settings:', error);
+  }
+}
+
+/**
+ * Start auto-lock timer
+ */
+function startAutoLockTimer(): void {
+  if (autoLockTimer) {
+    clearInterval(autoLockTimer);
+  }
+
+  // Check every 10 seconds for inactivity
+  autoLockTimer = setInterval(() => {
+    if (sessionState.isUnlocked) {
+      const now = Date.now();
+      const inactiveTime = now - sessionState.lastActivity;
+      const timeoutMs = sessionState.lockTimeoutMinutes * 60 * 1000;
+
+      if (inactiveTime >= timeoutMs) {
+        console.log('[Background] Auto-locking vault due to inactivity');
+        sessionState.isUnlocked = false;
+        // Broadcast lock event to all extension contexts
+        void chrome.runtime.sendMessage({
+          type: 'vault-locked',
+          reason: 'auto-lock',
+        }).catch(() => {
+          // Ignore errors if no listeners
+        });
+      }
+    }
+  }, 10000);
+}
+
+/**
+ * Stop auto-lock timer
+ */
+function stopAutoLockTimer(): void {
+  if (autoLockTimer) {
+    clearInterval(autoLockTimer);
+    autoLockTimer = null;
+  }
+}
+
+/**
+ * Update session activity
+ */
+function updateSessionActivity(): void {
+  sessionState.lastActivity = Date.now();
+}
+
+// Initialize session settings
+void initializeSessionSettings();
+
 // Listen for installation
 chrome.runtime.onInstalled.addListener((details: chrome.runtime.InstalledDetails) => {
   console.log('Extension installed:', details);
@@ -127,7 +214,42 @@ chrome.runtime.onMessage.addListener((
 ) => {
   console.log('[Background] Message received:', message);
   
-  // Validate message
+  // Handle session-related messages (non-validated format)
+  if (typeof message === 'object' && message !== null && 'type' in message) {
+    const msg = message as { type: string };
+    
+    switch (msg.type) {
+      case 'vault-unlock':
+        console.log('[Background] Vault unlocked');
+        sessionState.isUnlocked = true;
+        sessionState.lastActivity = Date.now();
+        startAutoLockTimer();
+        sendResponse({ success: true });
+        return false;
+        
+      case 'vault-lock':
+        console.log('[Background] Vault locked');
+        sessionState.isUnlocked = false;
+        stopAutoLockTimer();
+        sendResponse({ success: true });
+        return false;
+        
+      case 'session-activity':
+        updateSessionActivity();
+        sendResponse({ success: true });
+        return false;
+        
+      case 'get-session-state':
+        sendResponse({ 
+          isUnlocked: sessionState.isUnlocked,
+          lastActivity: sessionState.lastActivity,
+          lockTimeoutMinutes: sessionState.lockTimeoutMinutes,
+        });
+        return false;
+    }
+  }
+  
+  // Validate message for credential-related operations
   if (!isValidMessage(message)) {
     sendResponse({ error: 'Invalid message format' });
     return false;

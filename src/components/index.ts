@@ -9,3 +9,4 @@ export { SearchBar } from './SearchBar';
 export { PasswordList } from './PasswordList';
 export { CredentialItem } from './CredentialItem';
 export { PasswordGenerator } from './PasswordGenerator';
+export { Settings } from './Settings';
