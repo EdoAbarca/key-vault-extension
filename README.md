@@ -43,9 +43,21 @@ npm install
 
 ## Documentation
 
+### Development Guides
 - **[Development Workflow Guide](./docs/DEVELOPMENT_WORKFLOW.md)** - Complete guide for development with hot reload
 - **[Chrome Extension Loading Guide](./docs/CHROME_EXTENSION_GUIDE.md)** - Comprehensive guide for loading the extension in Chrome
 - **[Setup Summary](./docs/SETUP_SUMMARY.md)** - Technical stack and configuration details
+
+### Chrome Web Store Publication
+- **[Chrome Web Store Readiness Checklist](./docs/CHROME_WEB_STORE_READINESS.md)** - Complete checklist for submission readiness
+- **[Chrome Web Store Setup Guide](./docs/CHROME_WEB_STORE_SETUP.md)** - Developer account setup instructions
+- **[Store Listing Guide](./docs/STORE_LISTING_GUIDE.md)** - Prepare descriptions, screenshots, and assets
+- **[Submission Guide](./docs/CHROME_WEB_STORE_SUBMISSION.md)** - Step-by-step submission process
+- **[Permissions Justification](./docs/PERMISSIONS_JUSTIFICATION.md)** - Detailed permission explanations
+
+### Legal Documents
+- **[Privacy Policy](./PRIVACY_POLICY.md)** - Data collection and privacy practices
+- **[Terms of Service](./TERMS_OF_SERVICE.md)** - Usage terms and conditions
 
 
 ## Development
