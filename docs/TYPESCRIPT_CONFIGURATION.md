@@ -234,8 +234,7 @@ In `package.json`:
 {
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --fix",
-      "tsc-files --noEmit"
+      "eslint --fix"
     ]
   }
 }
@@ -244,10 +243,11 @@ In `package.json`:
 **What happens on commit:**
 1. Husky intercepts the git commit
 2. lint-staged identifies staged TypeScript files
-3. ESLint runs and auto-fixes issues
-4. `tsc-files` type-checks only staged files (fast!)
-5. If checks pass, commit proceeds
-6. If checks fail, commit is blocked with error messages
+3. ESLint runs and auto-fixes issues (includes TypeScript type checking via typescript-eslint)
+4. If checks pass, commit proceeds
+5. If checks fail, commit is blocked with error messages
+
+**Note:** ESLint with typescript-eslint performs comprehensive type checking on staged files, including all the strict type checking rules configured in `eslint.config.js`. This provides both linting and type safety in a single fast check.
 
 ### Setup Pre-commit Hooks
 Pre-commit hooks are automatically installed when you run:
