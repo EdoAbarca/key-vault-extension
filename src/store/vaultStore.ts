@@ -47,6 +47,32 @@ interface VaultState {
 }
 
 /**
+ * Helper function to decrypt all credentials from storage
+ */
+async function decryptAllCredentials(
+  storage: ReturnType<typeof createVaultStorage>
+): Promise<DecryptedCredential[]> {
+  const allCredentials = await storage.getAllCredentials();
+  const decryptedCredentials: DecryptedCredential[] = [];
+  
+  for (const credential of allCredentials) {
+    try {
+      const data = await storage.getCredentialData(credential.id);
+      decryptedCredentials.push({
+        ...data,
+        id: credential.id,
+        createdAt: credential.createdAt,
+        updatedAt: credential.updatedAt,
+      });
+    } catch (error) {
+      console.error(`Failed to decrypt credential ${credential.id}:`, error);
+    }
+  }
+  
+  return decryptedCredentials;
+}
+
+/**
  * Create vault store
  */
 export const useVaultStore = create<VaultState>((set, get) => ({
@@ -74,24 +100,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     
     try {
       const storage = createVaultStorage(key);
-      const allCredentials = await storage.getAllCredentials();
-      
-      // Decrypt all credentials
-      const decryptedCredentials: DecryptedCredential[] = [];
-      for (const credential of allCredentials) {
-        try {
-          const data = await storage.getCredentialData(credential.id);
-          decryptedCredentials.push({
-            ...data,
-            id: credential.id,
-            createdAt: credential.createdAt,
-            updatedAt: credential.updatedAt,
-          });
-        } catch (error) {
-          console.error(`Failed to decrypt credential ${credential.id}:`, error);
-        }
-      }
-      
+      const decryptedCredentials = await decryptAllCredentials(storage);
       set({ credentials: decryptedCredentials, isLoading: false });
     } catch (error) {
       set({ 
@@ -129,24 +138,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     
     try {
       const storage = createVaultStorage(key);
-      const allCredentials = await storage.getAllCredentials();
-      
-      // Decrypt all credentials
-      const decryptedCredentials: DecryptedCredential[] = [];
-      for (const credential of allCredentials) {
-        try {
-          const data = await storage.getCredentialData(credential.id);
-          decryptedCredentials.push({
-            ...data,
-            id: credential.id,
-            createdAt: credential.createdAt,
-            updatedAt: credential.updatedAt,
-          });
-        } catch (error) {
-          console.error(`Failed to decrypt credential ${credential.id}:`, error);
-        }
-      }
-      
+      const decryptedCredentials = await decryptAllCredentials(storage);
       set({ credentials: decryptedCredentials, isLoading: false });
     } catch (error) {
       set({ 

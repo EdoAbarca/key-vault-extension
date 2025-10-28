@@ -15,19 +15,21 @@ interface CredentialItemProps {
   onCopyUsername: () => void;
 }
 
+const FALLBACK_DOMAIN = 'example.com';
+
 /**
  * Extract domain from URL for favicon
  */
 function getFaviconUrl(url?: string): string {
   if (!url) {
-    return 'https://www.google.com/s2/favicons?domain=example.com&sz=32';
+    return `https://www.google.com/s2/favicons?domain=${FALLBACK_DOMAIN}&sz=32`;
   }
   
   try {
     const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
     return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=32`;
   } catch {
-    return 'https://www.google.com/s2/favicons?domain=example.com&sz=32';
+    return `https://www.google.com/s2/favicons?domain=${FALLBACK_DOMAIN}&sz=32`;
   }
 }
 
@@ -88,7 +90,7 @@ export function CredentialItem({
           alt=""
           className="w-8 h-8 rounded flex-shrink-0 mt-1"
           onError={(e) => {
-            e.currentTarget.src = 'https://www.google.com/s2/favicons?domain=example.com&sz=32';
+            e.currentTarget.src = `https://www.google.com/s2/favicons?domain=${FALLBACK_DOMAIN}&sz=32`;
           }}
         />
 
