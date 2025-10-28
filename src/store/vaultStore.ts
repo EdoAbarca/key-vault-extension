@@ -8,6 +8,7 @@ import { create } from 'zustand';
 import type { CryptographyKey } from 'sodium-plus';
 import type { CredentialData, ID } from '../storage/types';
 import { createVaultStorage } from '../storage/vaultStorage';
+import { useSessionStore } from './sessionStore';
 
 /**
  * Decrypted credential with metadata
@@ -44,6 +45,7 @@ interface VaultState {
   selectCredential: (id: ID | null) => void;
   copyToClipboard: (text: string) => Promise<void>;
   getFilteredCredentials: () => DecryptedCredential[];
+  updateActivity: () => void;
 }
 
 /**
@@ -90,6 +92,11 @@ export const useVaultStore = create<VaultState>((set, get) => ({
    */
   setKey: (key: CryptographyKey) => {
     set({ key, isUnlocked: true });
+    
+    // Initialize session when vault is unlocked
+    const sessionStore = useSessionStore.getState();
+    void sessionStore.initializeSession();
+    sessionStore.startAutoLockTimer();
   },
 
   /**
@@ -102,6 +109,11 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       const storage = createVaultStorage(key);
       const decryptedCredentials = await decryptAllCredentials(storage);
       set({ credentials: decryptedCredentials, isLoading: false });
+      
+      // Initialize session when vault is unlocked
+      const sessionStore = useSessionStore.getState();
+      await sessionStore.initializeSession();
+      sessionStore.startAutoLockTimer();
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to load credentials',
@@ -114,6 +126,11 @@ export const useVaultStore = create<VaultState>((set, get) => ({
    * Lock vault and clear sensitive data
    */
   lock: () => {
+    // Clear session
+    const sessionStore = useSessionStore.getState();
+    sessionStore.clearSession();
+    
+    // Clear sensitive data from memory
     set({
       isUnlocked: false,
       key: null,
@@ -153,6 +170,10 @@ export const useVaultStore = create<VaultState>((set, get) => ({
    */
   searchCredentials: (query: string) => {
     set({ searchQuery: query, selectedCredentialId: null });
+    
+    // Update activity on user interaction
+    const sessionStore = useSessionStore.getState();
+    sessionStore.updateActivity();
   },
 
   /**
@@ -160,6 +181,10 @@ export const useVaultStore = create<VaultState>((set, get) => ({
    */
   selectCredential: (id: ID | null) => {
     set({ selectedCredentialId: id });
+    
+    // Update activity on user interaction
+    const sessionStore = useSessionStore.getState();
+    sessionStore.updateActivity();
   },
 
   /**
@@ -168,10 +193,22 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   copyToClipboard: async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
+      
+      // Update activity on user interaction
+      const sessionStore = useSessionStore.getState();
+      sessionStore.updateActivity();
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
       throw error;
     }
+  },
+
+  /**
+   * Update activity (called on user interactions)
+   */
+  updateActivity: () => {
+    const sessionStore = useSessionStore.getState();
+    sessionStore.updateActivity();
   },
 
   /**
@@ -195,3 +232,16 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     });
   },
 }));
+
+/**
+ * Initialize auto-lock event listener
+ * This listens for vault-auto-lock events dispatched by the session store
+ */
+if (typeof window !== 'undefined') {
+  window.addEventListener('vault-auto-lock', () => {
+    const vaultStore = useVaultStore.getState();
+    if (vaultStore.isUnlocked) {
+      vaultStore.lock();
+    }
+  });
+}
