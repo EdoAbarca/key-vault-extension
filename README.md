@@ -41,6 +41,12 @@ The extension is fully compliant with Chrome Web Store requirements and modern e
 npm install
 ```
 
+## Documentation
+
+- **[Chrome Extension Loading Guide](./docs/CHROME_EXTENSION_GUIDE.md)** - Comprehensive guide for loading the extension in Chrome
+- **[Setup Summary](./docs/SETUP_SUMMARY.md)** - Technical stack and configuration details
+
+
 ## Development
 
 ```bash
