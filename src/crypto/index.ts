@@ -15,3 +15,16 @@ export {
   type KeyDerivationSalt,
   type DerivedKey,
 } from './keyDerivation';
+
+export {
+  encrypt,
+  decrypt,
+  generateNonce,
+  encryptCredentials,
+  decryptCredentials,
+  clearSensitiveData,
+  serializeEncryptedData,
+  deserializeEncryptedData,
+  XCHACHA20_PARAMS,
+  type EncryptedData,
+} from './encryption';
