@@ -154,7 +154,9 @@ export async function decrypt(
 
   // Verify nonce length
   if (nonce.length !== XCHACHA20_PARAMS.NONCE_LENGTH) {
-    throw new Error(`Invalid nonce length: expected ${String(XCHACHA20_PARAMS.NONCE_LENGTH)}, got ${String(nonce.length)}`);
+    const expectedLength = XCHACHA20_PARAMS.NONCE_LENGTH.toString();
+    const actualLength = nonce.length.toString();
+    throw new Error(`Invalid nonce length: expected ${expectedLength}, got ${actualLength}`);
   }
 
   try {
@@ -260,6 +262,29 @@ export function serializeEncryptedData(encryptedData: EncryptedData): string {
 }
 
 /**
+ * Type guard to validate EncryptedData structure
+ * 
+ * @param data - Data to validate
+ * @returns True if data is a valid EncryptedData structure
+ */
+function isEncryptedData(data: unknown): data is EncryptedData {
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
+  
+  const obj = data as Record<string, unknown>;
+  
+  return (
+    typeof obj.ciphertext === 'string' &&
+    typeof obj.nonce === 'string' &&
+    typeof obj.timestamp === 'number' &&
+    typeof obj.version === 'number' &&
+    obj.ciphertext.length > 0 &&
+    obj.nonce.length > 0
+  );
+}
+
+/**
  * Deserialize encrypted data from storage
  * 
  * @param serialized - JSON string representation
@@ -268,16 +293,14 @@ export function serializeEncryptedData(encryptedData: EncryptedData): string {
  */
 export function deserializeEncryptedData(serialized: string): EncryptedData {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const data = JSON.parse(serialized);
+    const data: unknown = JSON.parse(serialized);
     
-    // Validate required fields
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!data.ciphertext || !data.nonce || !data.timestamp || !data.version) {
+    // Validate using type guard
+    if (!isEncryptedData(data)) {
       throw new Error('Invalid encrypted data structure');
     }
     
-    return data as EncryptedData;
+    return data;
   } catch (error) {
     if (error instanceof Error && error.message.includes('Invalid encrypted data structure')) {
       throw error;
