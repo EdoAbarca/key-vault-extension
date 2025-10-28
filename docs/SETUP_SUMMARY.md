@@ -100,9 +100,11 @@ npm run lint        # Run ESLint
 
 #### Service Worker (Background Script)
 The extension uses a service worker instead of background pages (required in Manifest V3):
-- **File**: `src/background.ts`
+- **Source File**: `src/background.ts`
 - **Type**: ES Module
-- **Compiled to**: `dist/service-worker-loader.js`
+- **Build Output**: 
+  - Entry point: `dist/service-worker-loader.js` (loader that imports the compiled service worker)
+  - Compiled script: `dist/assets/background.ts-[hash].js` (actual service worker code)
 - **Features**:
   - Initialization logging
   - Installation event listener

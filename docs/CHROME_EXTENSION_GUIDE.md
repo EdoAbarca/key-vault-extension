@@ -62,10 +62,13 @@ dist/icon-128.png                        0.26 kB
 
 The build creates a `dist/` folder containing:
 - `manifest.json` - Extension configuration
-- `service-worker-loader.js` - Background service worker
+- `service-worker-loader.js` - Service worker entry point (loads the actual compiled worker)
 - `index.html` - Popup UI
-- `icon-*.png` - Extension icons
+- `icon-*.png` - Extension icons (3 sizes: 16x16, 48x48, 128x128)
 - `assets/` - Compiled JavaScript and CSS
+  - `background.ts-[hash].js` - Compiled service worker code
+  - `popup-[hash].js` - Compiled popup application
+  - `popup-[hash].css` - Compiled styles
 
 ### 3. Load in Chrome
 
@@ -161,12 +164,14 @@ chrome.runtime.sendMessage({test: "hello"}, response => {
 3. Remove and reload the extension
 
 #### Issue: "Service worker registration failed"
-**Cause**: Service worker file not found or invalid
+**Cause**: Service worker files not found or invalid
 
 **Solution**:
-1. Check `dist/service-worker-loader.js` exists
-2. Verify `dist/assets/background.ts-*.js` exists
+1. Check `dist/service-worker-loader.js` exists (loader/entry point)
+2. Verify compiled service worker `dist/assets/background.ts-*.js` exists
 3. Rebuild: `npm run build`
+
+**Note**: The service worker uses a two-file structure - `service-worker-loader.js` imports the actual compiled background script from the assets folder.
 
 #### Issue: "Could not load icon 'icon-*.png'"
 **Cause**: Icon files missing
