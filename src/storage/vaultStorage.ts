@@ -47,10 +47,45 @@ export class FolderNotFoundError extends Error {
 }
 
 /**
+ * Type guard to validate CredentialData structure
+ */
+function isCredentialData(data: unknown): data is CredentialData {
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
+
+  const obj = data as Record<string, unknown>;
+
+  return (
+    typeof obj.title === 'string' &&
+    typeof obj.username === 'string' &&
+    typeof obj.password === 'string' &&
+    (obj.url === undefined || typeof obj.url === 'string') &&
+    (obj.notes === undefined || typeof obj.notes === 'string') &&
+    (obj.customFields === undefined || typeof obj.customFields === 'object')
+  );
+}
+
+/**
+ * Convert CredentialData to Record for encryption
+ */
+function credentialDataToRecord(data: CredentialData): Record<string, unknown> {
+  return {
+    title: data.title,
+    username: data.username,
+    password: data.password,
+    ...(data.url && { url: data.url }),
+    ...(data.notes && { notes: data.notes }),
+    ...(data.customFields && { customFields: data.customFields }),
+  };
+}
+
+/**
  * Generate a unique ID for database records
+ * Uses crypto.randomUUID() for guaranteed uniqueness
  */
 function generateId(): ID {
-  return `${Date.now().toString()}-${Math.random().toString(36).substring(2, 15)}`;
+  return crypto.randomUUID();
 }
 
 /**
@@ -105,7 +140,7 @@ export class VaultStorage {
     const db = getDatabase();
     
     // Encrypt credential data
-    const encryptedData = await encryptCredentials(data as unknown as Record<string, unknown>, this.key);
+    const encryptedData = await encryptCredentials(credentialDataToRecord(data), this.key);
     
     const now = Date.now();
     const credential: Credential = {
@@ -156,7 +191,13 @@ export class VaultStorage {
 
     // Decrypt credential data
     const data = await decryptCredentials(credential.encryptedData, this.key);
-    return data as unknown as CredentialData;
+    
+    // Validate the decrypted data structure
+    if (!isCredentialData(data)) {
+      throw new Error('Decrypted data does not match CredentialData structure');
+    }
+    
+    return data;
   }
 
   /**
@@ -196,7 +237,7 @@ export class VaultStorage {
     }
 
     // Encrypt updated data
-    const encryptedData = await encryptCredentials(data as unknown as Record<string, unknown>, this.key);
+    const encryptedData = await encryptCredentials(credentialDataToRecord(data), this.key);
     
     await db.credentials.update(id, {
       encryptedData,
