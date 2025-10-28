@@ -155,7 +155,7 @@ export async function verifyPassword(
 export async function clearKey(key: CryptographyKey): Promise<void> {
   const sodium = await SodiumPlus.auto();
   const buffer = key.getBuffer();
-  await Promise.resolve(sodium.sodium_memzero(buffer));
+  void sodium.sodium_memzero(buffer);
 }
 
 /**
