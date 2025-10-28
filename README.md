@@ -43,15 +43,26 @@ npm install
 
 ## Documentation
 
+- **[Development Workflow Guide](./docs/DEVELOPMENT_WORKFLOW.md)** - Complete guide for development with hot reload
 - **[Chrome Extension Loading Guide](./docs/CHROME_EXTENSION_GUIDE.md)** - Comprehensive guide for loading the extension in Chrome
 - **[Setup Summary](./docs/SETUP_SUMMARY.md)** - Technical stack and configuration details
 
 
 ## Development
 
+Start the development server with hot reload:
+
 ```bash
 npm run dev
 ```
+
+The development server includes:
+- **Hot Module Replacement (HMR)**: Changes to React components update instantly
+- **React Fast Refresh**: Preserves component state during updates
+- **TypeScript compilation**: Automatic type checking
+- **Error overlay**: Visual feedback for errors
+
+After starting the dev server, load the `dist` folder as an unpacked extension in Chrome. See the [Development Workflow Guide](./docs/DEVELOPMENT_WORKFLOW.md) for detailed instructions.
 
 ## Build
 
