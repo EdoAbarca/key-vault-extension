@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "action": {
     "default_popup": "index.html",
+    "default_title": "Key Vault - Secure Credential Manager",
     "default_icon": {
       "16": "icon-16.png",
       "48": "icon-48.png",
