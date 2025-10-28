@@ -171,7 +171,7 @@ chrome.runtime.sendMessage({test: "hello"}, response => {
 2. Verify compiled service worker `dist/assets/background.ts-*.js` exists
 3. Rebuild: `npm run build`
 
-**Note**: The service worker uses a two-file structure - `service-worker-loader.js` imports the actual compiled background script from the assets folder.
+**Note**: The service worker uses a two-file structure - `service-worker-loader.js` imports the actual compiled background script from the assets folder. This pattern is created by Vite to properly handle ES modules, code splitting, and dependency loading in the service worker context, ensuring all dependencies are correctly bundled and loaded.
 
 #### Issue: "Could not load icon 'icon-*.png'"
 **Cause**: Icon files missing

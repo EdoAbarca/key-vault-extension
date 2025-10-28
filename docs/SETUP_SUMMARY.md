@@ -105,6 +105,7 @@ The extension uses a service worker instead of background pages (required in Man
 - **Build Output**: 
   - Entry point: `dist/service-worker-loader.js` (loader that imports the compiled service worker)
   - Compiled script: `dist/assets/background.ts-[hash].js` (actual service worker code)
+  - This two-file structure is created by Vite to properly handle ES modules, code splitting, and dependency loading in the service worker context
 - **Features**:
   - Initialization logging
   - Installation event listener
